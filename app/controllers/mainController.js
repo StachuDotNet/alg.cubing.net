@@ -1,6 +1,7 @@
 ﻿angular.module('algxApp')
     .controller('mainController',
-    ["$scope", "$location", "debounce", "colorService", function ($scope, $location, debounce, colorService) {
+    ["$scope", "$location", "debounce", "colorService", "algEscapeService",
+    function ($scope, $location, debounce, colorService, algEscapeService) {
 
     var touchBrowser = ("ontouchstart" in document.documentElement);
     var fire = true;
@@ -207,28 +208,10 @@
         $("#canvasPNG").fadeTo("slow", 1);
     }
 
-    function escape_alg(alg) {
-        if (!alg) {return alg;}
-        var escaped = alg;
-        escaped = escaped.replace(/_/g, "&#95;").replace(/ /g, "_");
-        escaped = escaped.replace(/\+/g, "&#2b;");
-        escaped = escaped.replace(/-/g, "&#45;").replace(/'/g, "-");
-        return escaped;
-    }
-
-    function unescape_alg(alg) {
-        if (!alg) {return alg;}
-        var unescaped = alg;
-        unescaped = unescaped.replace(/-/g, "'").replace(/&#45;/g, "-");
-        unescaped = unescaped.replace(/\+/g, " ").replace(/&#2b;/g, "+"); // Recognize + as space. Many URL encodings will do this.
-        unescaped = unescaped.replace(/_/g, " ").replace(/&#95;/g, "_");
-        return unescaped;
-    }
-
     $scope.alg_default = "";
-    $scope.alg = unescape_alg(search["alg"]) || $scope.alg_default;
+    $scope.alg = algEscapeService.unescape_alg(search["alg"]) || $scope.alg_default;
     $scope.setup_default = "";
-    $scope.setup = unescape_alg(search["setup"]) || $scope.setup_default;
+    $scope.setup = algEscapeService.unescape_alg(search["setup"]) || $scope.setup_default;
 
     function setWithDefault(name, value) {
         var _default = $scope[name + "_default"];
@@ -257,8 +240,8 @@
 
     $scope.updateLocation = function() {
         $location.replace();
-        setWithDefault("alg", escape_alg($scope.alg));
-        setWithDefault("setup", escape_alg($scope.setup));
+        setWithDefault("alg", algEscapeService.escape_alg($scope.alg));
+        setWithDefault("setup", algEscapeService.escape_alg($scope.setup));
         setWithDefault("puzzle", $scope.puzzle.id);
         setWithDefault("type", $scope.type.id);
         setWithDefault("scheme", $scope.scheme.id);

@@ -1,7 +1,7 @@
 ﻿angular.module('algxApp')
     .controller('mainController',
-    ["$scope", "$location", "debounce", "colorService", "algEscapeService",
-    function ($scope, $location, debounce, colorService, algEscapeService) {
+    ["$scope", "$location", "debounce", "colorService", "formatterService",
+    function ($scope, $location, debounce, colorService, formatterService) {
 
     var touchBrowser = ("ontouchstart" in document.documentElement);
     var fire = true;
@@ -209,9 +209,9 @@
     }
 
     $scope.alg_default = "";
-    $scope.alg = algEscapeService.unescape_alg(search["alg"]) || $scope.alg_default;
+    $scope.alg = formatterService.unescape_alg(search["alg"]) || $scope.alg_default;
     $scope.setup_default = "";
-    $scope.setup = algEscapeService.unescape_alg(search["setup"]) || $scope.setup_default;
+    $scope.setup = formatterService.unescape_alg(search["setup"]) || $scope.setup_default;
 
     function setWithDefault(name, value) {
         var _default = $scope[name + "_default"];
@@ -221,27 +221,13 @@
     }
 
     function forumLinkText(url) {
-        var algWithCommentsGreyed = ($scope.alg+"\n").replace(
-          /(\/\/.*)[\n\r]/g, "[COLOR=\"gray\"]$1[/COLOR]\n").replace(
-          /(\/\*[^(\*\/)]*\*\/)/g, "[COLOR=\"gray\"]$1[/COLOR]"
-        );
-        var text = algWithCommentsGreyed +
-          '\n[COLOR="gray"]// View at [URL="' +
-          url +
-          '"]alg.cubing.net[/URL][/COLOR]';
-        if ($scope.setup !== "") {
-            text = "[COLOR=\"gray\"]/* Scramble */[/COLOR]\n" +
-              $scope.setup +
-              "\n\n [COLOR=\"gray\"]/* Solve */[/COLOR]\n" +
-              text
-        }
-        return text.trim(); // The trim is redundant for angular.js, but let's keep it just in case.
+        return formatterService.forumLinkText(url, $scope.alg, $scope.setup);
     }
 
     $scope.updateLocation = function() {
         $location.replace();
-        setWithDefault("alg", algEscapeService.escape_alg($scope.alg));
-        setWithDefault("setup", algEscapeService.escape_alg($scope.setup));
+        setWithDefault("alg", formatterService.escape_alg($scope.alg));
+        setWithDefault("setup", formatterService.escape_alg($scope.setup));
         setWithDefault("puzzle", $scope.puzzle.id);
         setWithDefault("type", $scope.type.id);
         setWithDefault("scheme", $scope.scheme.id);

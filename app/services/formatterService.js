@@ -1,5 +1,5 @@
 ﻿angular.module('algxApp')
-.factory('algEscapeService', function () {
+.factory('formatterService', function () {
     var escape_alg = function (alg) {
         if (!alg) { return alg; }
         var escaped = alg;
@@ -18,8 +18,28 @@
         return unescaped;
     }
 
+    var forumLinkText = function (url, alg, setup) {
+        var algWithCommentsGreyed = (alg + "\n").replace(
+          /(\/\/.*)[\n\r]/g, "[COLOR=\"gray\"]$1[/COLOR]\n").replace(
+          /(\/\*[^(\*\/)]*\*\/)/g, "[COLOR=\"gray\"]$1[/COLOR]"
+        );
+        var text = algWithCommentsGreyed +
+          '\n[COLOR="gray"]// View at [URL="' +
+          url +
+          '"]alg.cubing.net[/URL][/COLOR]';
+        if (setup !== "") {
+            text = "[COLOR=\"gray\"]/* Scramble */[/COLOR]\n" +
+              setup +
+              "\n\n [COLOR=\"gray\"]/* Solve */[/COLOR]\n" +
+              text
+        }
+        return text;
+    }
+
+
     return {
         escape_alg: escape_alg,
-        unescape_alg: unescape_alg
+        unescape_alg: unescape_alg,
+        forumLinkText: forumLinkText
     }
 });

@@ -1,7 +1,5 @@
 # alg.cubing.net
 
-![alt tag](https://travis-ci.org/StachuK1992/alg.cubing.net.svg)
-
 The new generation of alg/reconstruction viewing and sharing.  
 Built on [`alg.js`](https://github.com/cubing/alg.js) and [`twisty.js`](https://github.com/cubing/twisty.js).
 

@@ -1,6 +1,6 @@
 ﻿angular.module('algxApp')
     .controller('mainController',
-    ["$scope", "$location", "debounce", function ($scope, $location, debounce) {
+    ["$scope", "$location", "debounce", "colorService", function ($scope, $location, debounce, colorService) {
 
     var touchBrowser = ("ontouchstart" in document.documentElement);
     var fire = true;
@@ -277,37 +277,6 @@
         $scope.share_forum_long = forumLinkText($scope.share_url);
     };
 
-    var colorMap = {
-        "y": 0xffff00,
-        "w": 0xffffff,
-        "b": 0x0000ff,
-        "g": 0x00ff00,
-        "o": 0xff8800,
-        "r": 0xff0000,
-        "x": 0x444444
-    };
-
-    var lightColorMap = {
-        "y": 0xdddd00,
-        "w": 0xcccccc,
-        "b": 0x000099,
-        "g": 0x00bb00,
-        "o": 0xbb6600,
-        "r": 0xaa0000,
-        "x": 0x333333
-    };
-
-    function colorList(str) {
-        var out = [];
-        var outLight = [];
-        var str2 = ("x" + str).split("");
-        var reorder = [0, 6, 3, 1, 2, 4, 5];
-        for (var i in str2) {
-            out.push(colorMap[str2[reorder[i]]]);
-            outLight.push(lightColorMap[str2[reorder[i]]]);
-        }
-        return out.concat(outLight);
-    }
 
     function locationToIndex(text, line, column) {
         var lines = $scope.alg.split("\n");
@@ -347,7 +316,7 @@
             "stickerBorder": false,
             "doubleSided": !$scope.hint_stickers,
             // "borderWidth": 1,
-            "colors": colorList($scope.scheme.scheme)
+            "colors": colorService.colorList($scope.scheme.scheme)
         });
 
         try {
@@ -469,7 +438,7 @@
         }
 
         // TODO: With a single twistyScene this own't be necessary
-        $("#reset").unbind("click");
+        $("#reset, #unbind").unbind("click");
         $("#back").unbind("click");
         $("#play").unbind("click");
         $("#pause").unbind("click");

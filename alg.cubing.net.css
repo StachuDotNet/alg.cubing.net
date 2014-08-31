@@ -92,7 +92,7 @@ html, textarea {
   border: 1px solid rgba(0, 0, 0, 0.2);
   font-size: 1em;
   padding: 0.4em 0.6em;
-  width: 8em;
+  float:left;
   white-space: nowrap;
   margin: 0.2em;
 }

@@ -26,10 +26,14 @@
     <script src="lib/angular-debounce.js"></script>
     <script src="lib/elastic.js"></script>
     <script src="lib/ZeroClipboard.js"></script>
+    <script src="lib/ngClip.js"></script>
 
     <!-- actual app -->
     <script src="app/app.js"></script>
     <script src="app/filters/titleFilter.js"></script>
+    <script src="app/constants/systemDefaults.js"></script>
+
+    <script src="app/services/algService.js"></script>
     <script src="app/services/colorService.js"></script>
     <script src="app/services/formatterService.js"></script>
     <script src="app/controllers/mainController.js"></script>
@@ -126,11 +130,14 @@
                     <h2>Settings</h2>
                     <div class="section">
                         <select data-ng-model="puzzle"
-                                data-ng-options="p.name group by p.group for p in puzzle_list"></select><select data-ng-model="stage"
-                                                                                                                data-ng-options="s.name group by s.group for s in stage_list"
-                                                                                                                data-ng-disabled="puzzle.name != '3x3x3'"></select><select data-ng-model="type"
-                                                                                                                                                                           data-ng-options="a.name group by a.group for a in type_list"></select>
+                                data-ng-options="p.name group by p.group for p in puzzle_list"></select>
 
+                        <select data-ng-model="stage"
+                                data-ng-options="s.name group by s.group for s in stage_list"
+                                data-ng-disabled="puzzle.name != '3x3x3'"></select>
+
+                        <select data-ng-model="type"
+                                data-ng-options="a.name group by a.group for a in type_list"></select>
                         <br>
                         Color Scheme:
 
@@ -159,28 +166,27 @@
                     <div>
                         <h2>Tools</h2>
                         <div class="section buttons" id="tools">
-                            <button data-ng-click="expand();">Expand</button><button data-ng-click="simplify();">
-                                Simplify
-                            </button><br><button data-ng-click="clear();">
-                                <i class="fa fa-square-o"></i> Clear
-                            </button><button data-ng-click="reset();">
-                                <i class="fa fa-power-off"></i> Reset
-                            </button><br><button data-ng-click="mirrorAcrossM();" title="Mirror across M">
-                                <i class="fa fa-arrows-h"></i> Mirror (M)
-                            </button><button data-ng-click="mirrorAcrossS();" title="Mirror across S">
-                                <i class="fa fa-expand"></i> Mirror (S)
-                            </button><br><button data-ng-click="invert();">
-                                <i class="fa fa-backward"></i> Invert
-                            </button><button data-ng-click="removeComments();">
-                                Remove Comments
-                            </button><br><button data-ng-click="image();">
-                                <i class="fa fa-image"></i> Image
-                            </button>
-                            <center><div id="canvasPNG"></div></center>
+                            <button data-ng-click="expand()">Expand</button>
+                            <button data-ng-click="simplify()">Simplify</button><br>
+                            <button data-ng-click="clear()"><i class="fa fa-square-o"></i> Clear</button>
+                            <button data-ng-click="reset()"><i class="fa fa-power-off"></i> Reset</button><br>
+                            <button data-ng-click="mirrorAcrossM()" title="Mirror across M"><i class="fa fa-arrows-h"></i> Mirror (M)</button>
+                            <button data-ng-click="mirrorAcrossS()" title="Mirror across S"><i class="fa fa-expand"></i> Mirror (S)</button><br>
+
+                            <button data-ng-click="invert()"><i class="fa fa-backward"></i> Invert</button>
+                            <button data-ng-click="removeComments()">Remove Comments</button><br>
+                            <button data-ng-click="image()"><i class="fa fa-image"></i> Image</button>
+                            <button><i class="fa fa-image"></i></button> <!--Hack for space.--> 
+                            <!--<center><div id="canvasPNG"></div></center>-->
                         </div>
                     </div>
 
-                    <h2>Forum Link <button id="copyShort" class="clipboard" style="display: none; margin: 0; padding: 2px 6px; width: 2em; font-size: 0.75em"><i class="fa fa-clipboard"></i></button></h2>
+                    <h2>
+                        Forum Link
+                        <!--<button clip-copy="title" id="copyShort" class="clipboard" style="margin: 0; padding: 2px 6px; width: 2em; font-size: 0.75em">
+                            <i class="fa fa-clipboard"></i>
+                        </button>-->
+                    </h2>
 
                     <div class="section" id="share">
                         <div data-ng-show="! type.reconstruction">
@@ -192,10 +198,11 @@
                                    value="[Short forum link will appear here.]" />
                         </div>
                         <div data-ng-show="type.reconstruction">
-                            <button id="copyLong" class="clipboard" style="display: none; width: 2em"><i class="fa fa-clipboard"></i></button><textarea class="sharetext"
-                                                                                                                                                        readonly="readonly"
-                                                                                                                                                        onclick="this.focus(); this.select();"
-                                                                                                                                                        data-ng-bind="share_forum_long">
+                            <button id="copyLong" class="clipboard" style="display: none; width: 2em"><i class="fa fa-clipboard"></i></button>
+                            <textarea class="sharetext"
+                                      readonly="readonly"
+                                      onclick="this.focus(); this.select();"
+                                      data-ng-model="share_forum_long">
                                 [Long forum link will appear here.]
                             </textarea>
                         </div>
@@ -203,30 +210,20 @@
 
                     <h2>Examples</h2>
                     <div class="section buttons" id="examples">
-                        <button href="" data-ng-click="demo('mats-5.55');">
-                            WR
-                        </button><button href="" data-ng-click="demo('T-Perm');">
-                            T
-                        </button><button href="" data-ng-click="demo('Sune');">
-                            Sune
-                        </button><button href="" data-ng-click="demo('notation');">
-                            Notation
-                        </button><button onclick="location.href = 'http://www.speedsolving.com/wiki/index.php/OLL'">
-                            OLLs
-                        </button><button onclick="location.href = 'http://www.speedsolving.com/wiki/index.php/PLL'">PLLs</button>
+                        <button href="" data-ng-click="demo('mats-5.55')">WR</button>
+                        <button href="" data-ng-click="demo('T-Perm')">T</button>
+                        <button href="" data-ng-click="demo('Sune')">Sune</button>
+                        <button href="" data-ng-click="demo('notation')">Notation</button>
+                        <button onclick="location.href = 'http://www.speedsolving.com/wiki/index.php/OLL'">OLLs</button>
+                        <button onclick="location.href = 'http://www.speedsolving.com/wiki/index.php/PLL'">PLLs</button>
                     </div>
 
                     <h2>Info</h2>
                     <div class="section buttons" id="info-section">
-                        <button onclick="location.href = 'https://github.com/cubing/alg.cubing.net/issues/51'">
-                            Features
-                        </button><button onclick="location.href = 'https://github.com/cubing/alg.cubing.net'">
-                            GitHub
-                        </button><button onclick="location.href = 'http://www.speedsolving.com/forum/showthread.php?46468-alg-cubing-net'">
-                            speedsolving.com
-                        </button><button onclick="location.href = './source/alg.cubing.net.zip'">
-                            Download
-                        </button>
+                        <button onclick="location.href = 'https://github.com/cubing/alg.cubing.net/issues/51'">Features</button>
+                        <button onclick="location.href = 'https://github.com/cubing/alg.cubing.net'">GitHub</button>
+                        <button onclick="location.href = 'http://www.speedsolving.com/forum/showthread.php?46468-alg-cubing-net'">speedsolving.com</button>
+                        <button onclick="location.href = './source/alg.cubing.net.zip'">Download</button>
                     </div>
                 </div>
             </div>

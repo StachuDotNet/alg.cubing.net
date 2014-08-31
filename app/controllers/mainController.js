@@ -1,14 +1,9 @@
 ﻿angular.module('algxApp')
     .controller('mainController',
-    ["$scope", "$location", "debounce", "colorService", "formatterService",
-    function ($scope, $location, debounce, colorService, formatterService) {
+    ["$scope", "$location", "debounce", "colorService", "formatterService", "algService", 'systemDefaults',
+    function ($scope, $location, debounce, colorService, formatterService, algService, systemDefaults) {
 
-    var touchBrowser = ("ontouchstart" in document.documentElement);
     var fire = true;
-
-    // if (touchBrowser) {
-    //   $scope.hollow = true;
-    // }
 
     var search = $location.search();
 
@@ -208,20 +203,14 @@
         $("#canvasPNG").fadeTo("slow", 1);
     }
 
-    $scope.alg_default = "";
-    $scope.alg = formatterService.unescape_alg(search["alg"]) || $scope.alg_default;
-    $scope.setup_default = "";
-    $scope.setup = formatterService.unescape_alg(search["setup"]) || $scope.setup_default;
+    $scope.alg = formatterService.unescape_alg(search["alg"]) || systemDefaults.alg_default;
+    $scope.setup = formatterService.unescape_alg(search["setup"]) || systemDefaults.setup_default;
 
     function setWithDefault(name, value) {
         var _default = $scope[name + "_default"];
         // console.log(name);
         // console.log(_default);
         $location.search(name, (value == _default) ? null : value);
-    }
-
-    function forumLinkText(url) {
-        return formatterService.forumLinkText(url, $scope.alg, $scope.setup);
     }
 
     $scope.updateLocation = function() {
@@ -243,7 +232,7 @@
             $scope.share_url += '&view=playback';
         }
         $scope.share_forum_short = "[URL=\"" + $scope.share_url + "\"]" + $scope.alg + "[/URL]";
-        $scope.share_forum_long = forumLinkText($scope.share_url);
+        $scope.share_forum_long = formatterService.forumLinkText($scope.share_url, $scope.alg, $scope.setup); 
     };
 
 
@@ -263,7 +252,6 @@
     var selectionStart = document.getElementById("algorithm").selectionStart;
 
     $scope.twisty_init = function() {
-
         $("#viewer").empty();
 
         var webgl = ( function () { try { var canvas = document.createElement( 'canvas' ); return !! window.WebGLRenderingContext && ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) ); } catch( e ) { return false; } } )();
@@ -323,22 +311,12 @@
           }
         );
 
-        // Temporary hack to work around highlighting bug.
-        function isNested(alg) {
-            for (var move in alg) {
-                var type = alg[move].type;
-                if (type == "commutator" || type == "conjugate" || type == "group") {
-                    return true;
-                }
-            }
-            return false;
-        }
-        var algNested = isNested(algoFull);
+        var algNested = algService.isNested(algoFull);
 
         var previousStart = 0;
         var previousEnd = 0;
         function highlightCurrentMove(force) {
-            // if (!force && (algNested || touchBrowser || !$scope.animating)) {
+            // if (!force && (algNested || !$scope.animating)) {
             //   return;
             // }
             // TODO: Make a whole lot more efficient.
@@ -407,12 +385,7 @@
         }
 
         // TODO: With a single twistyScene this own't be necessary
-        $("#reset, #unbind").unbind("click");
-        $("#back").unbind("click");
-        $("#play").unbind("click");
-        $("#pause").unbind("click");
-        $("#forward").unbind("click");
-        $("#skip").unbind("click");
+        $("#reset, #back, #play, #pause, #forward, #skip").unbind("click");
         $(document).unbind("selectionchange");
 
         var start = gettingCurrentMove(twistyScene.play.start);
@@ -541,32 +514,6 @@
     $scope.algDebounce = function(event) {
         $scope.algDelayed = (event == "delayed")
     }
-
-    ZeroClipboard.config( { swfPath: "lib/ZeroClipboard.swf" } );
-    new ZeroClipboard($("#copyShort")).on("copy", function (event) {
-        event.clipboardData.setData("text/plain", $scope.share_forum_short);
-        $("body").fadeOut(100).fadeIn(500);
-        console.log("Copying to clipboard", $scope.share_forum_short)
-    });
-    new ZeroClipboard($("#copyLong")).on("copy", function (event) {
-        event.clipboardData.setData("text/plain", $scope.share_forum_long);
-        $("body").fadeOut(100).fadeIn(500);
-        console.log("Copying to clipboard", $scope.share_forum_long)
-    });
-
-    // If the page was opened locally, copying to clipboard won't work.
-    // This seems to be a bad heuristic, because I've only ever seen it work in Chrome.
-    try {
-        $.ajax("lib/ZeroClipboard.swf", {
-            success: function() {
-                console.log("XHR test succeeded. Enabling clipboard button.");
-                $("button.clipboard").show();
-            },
-            error: function() {
-                console.warn("XHR test failed. Disabling clipboard button.");
-            }
-        });
-    } catch(e) {}
 
     // TODO: Use IFs for puzzle/type
     var demos = {

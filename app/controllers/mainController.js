@@ -13,7 +13,7 @@
                 obj[list[i][key]] = list[i];
             }
             return obj;
-        }
+        };
 
         var param_defaults = [];
 
@@ -22,7 +22,7 @@
             $scope.setup = "";
             $scope.current_move = 0;
             $scope.title = "";
-        }
+        };
 
         $scope.reset = function () {
             for (var param in param_defaults) {
@@ -30,15 +30,15 @@
             }
             $scope.speed = 1;
             $scope.clear();
-        }
+        };
 
-        function initParameter(param, fallback, list) {
-            var obj = indexBy(list, "id");
-            _scope[param] = obj[search[param]] || obj[fallback];
-            _scope[param + "_map"] = obj;
-            _scope[param + "_list"] = list;
-            _scope[param + "_default"] = fallback;
-            _param_defaults[param] = obj[fallback];
+        function initParameter(a) {
+            var obj = indexBy(a.list, "id");
+            $scope[a.param] = obj[search[a.param]] || obj[a.fallback];
+            $scope[a.param + "_map"] = obj;
+            $scope[a.param + "_list"] = a.list;
+            $scope[a.param + "_default"] = a.fallback;
+            param_defaults[a.param] = obj[a.fallback];
         };
 
         initParameter(initService.puzzles);
@@ -60,30 +60,31 @@
         $scope.title = $scope.title_default;
         if ("title" in search) {
             $scope.title = search["title"];
-        }
+        };
 
         $scope.nextView = function () {
             // TODO: Is there a better way to do view cycling?
             var idx = $scope.view_list.indexOf($scope.view);
             $scope.view = $scope.view_list[(idx + 1) % ($scope.view_list.length)];
             $scope.updateLocation();
-        }
+        };
 
         $scope.expand = function () {
             $scope.alg = alg.cube.expand($scope.alg);
-        }
+        };
 
         $scope.simplify = function () {
             $scope.alg = alg.cube.simplify($scope.alg);
             $scope.addHistoryCheckpoint = true;
-        }
+        };
 
         var inverseTypeMap = {
             "moves": "alg",
             "reconstruction": "reconstruction-end-with-setup",
             "alg": "moves",
             "reconstruction-end-with-setup": "reconstruction"
-        }
+        };
+
         $scope.invert = function () {
 
             // The setup stays the same. It's like magic!
